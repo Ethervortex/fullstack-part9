@@ -1,4 +1,4 @@
-interface ExerciseResult {
+export interface ExerciseResult {
   periodLength: number;
   trainingDays: number;
   success: boolean;
@@ -8,12 +8,12 @@ interface ExerciseResult {
   average: number;
 }
 
-interface ExerciseValues {
+export interface ExerciseValues {
   dailyExerciseHours: number[];
   targetAmount: number;
 }
 
-const parseInput = (args: string[]): ExerciseValues => {
+export const parseInput = (args: string[]): ExerciseValues => {
   if (args.length < 4) throw new Error('Not enough arguments');
 
   const targetAmount = Number(args[2]);
@@ -35,7 +35,7 @@ const parseInput = (args: string[]): ExerciseValues => {
   };
 };
 
-const calculateExercises = (dailyExerciseHours: number[], targetAmount: number): ExerciseResult => {
+export const calculateExercises = (dailyExerciseHours: number[], targetAmount: number): ExerciseResult => {
   const periodLength = dailyExerciseHours.length;
   const trainingDays = dailyExerciseHours.filter(hours => hours > 0).length;
   
@@ -71,16 +71,18 @@ const calculateExercises = (dailyExerciseHours: number[], targetAmount: number):
   };
 };
 
-try {
-  // Hard coded:
-  // const dailyExerciseHours = [3, 0, 2, 4.5, 0, 3, 1];
-  // const targetAmount = 2;
-  const {dailyExerciseHours, targetAmount} = parseInput(process.argv);
-  console.log(calculateExercises(dailyExerciseHours, targetAmount));
-} catch (error: unknown) {
-  let errorMessage = 'Something went wrong.';
-  if (error instanceof Error) {
-    errorMessage += ' Error: ' + error.message;
+if (require.main === module) {
+  try {
+    // Hard coded:
+    // const dailyExerciseHours = [3, 0, 2, 4.5, 0, 3, 1];
+    // const targetAmount = 2;
+    const {dailyExerciseHours, targetAmount} = parseInput(process.argv);
+    console.log(calculateExercises(dailyExerciseHours, targetAmount));
+  } catch (error: unknown) {
+    let errorMessage = 'Something went wrong.';
+    if (error instanceof Error) {
+      errorMessage += ' Error: ' + error.message;
+    }
+    console.log(errorMessage);
   }
-  console.log(errorMessage);
 }
