@@ -16,26 +16,18 @@ interface ExerciseValues {
 const parseInput = (args: string[]): ExerciseValues => {
   if (args.length < 4) throw new Error('Not enough arguments');
 
-  const argsString = args.slice(2).join(' ');
+  const targetAmount = Number(args[2]);
+  if (isNaN(targetAmount)) {
+    throw new Error('Provided target was not a number!');
+  }
 
-  const arrayStringMatch = argsString.match(/\[(.*?)\]/);
-  if (!arrayStringMatch) throw new Error('Could not parse the daily exercise hours array.');
-
-  const arrayString = arrayStringMatch[1];
-  const targetString = argsString.replace(arrayStringMatch[0], '').trim();
-  
-  const dailyExerciseHours = arrayString.split(',').map(arg => {
-    const value = Number(arg.trim());
+  const dailyExerciseHours = args.slice(3).map(arg => {
+    const value = Number(arg);
     if (isNaN(value)) {
-      throw new Error('Provided hours are not valid numbers!');
+      throw new Error('Provided exercise hours are not valid numbers!');
     }
     return value;
   });
-
-  const targetAmount = Number(targetString);
-  if (isNaN(targetAmount)) {
-    throw new Error('Provided target amount is not a number!');
-  }
 
   return {
     dailyExerciseHours,
