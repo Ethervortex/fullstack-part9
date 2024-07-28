@@ -33,7 +33,7 @@ const parseInput = (args: string[]): ExerciseValues => {
     dailyExerciseHours,
     targetAmount
   };
-}
+};
 
 const calculateExercises = (dailyExerciseHours: number[], targetAmount: number): ExerciseResult => {
   const periodLength = dailyExerciseHours.length;
@@ -69,7 +69,7 @@ const calculateExercises = (dailyExerciseHours: number[], targetAmount: number):
     target: targetAmount,
     average
   };
-}
+};
 
 try {
   // Hard coded:
@@ -78,7 +78,7 @@ try {
   const {dailyExerciseHours, targetAmount} = parseInput(process.argv);
   console.log(calculateExercises(dailyExerciseHours, targetAmount));
 } catch (error: unknown) {
-  let errorMessage = 'Something went wrong.'
+  let errorMessage = 'Something went wrong.';
   if (error instanceof Error) {
     errorMessage += ' Error: ' + error.message;
   }
