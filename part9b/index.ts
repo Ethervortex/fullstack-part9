@@ -37,8 +37,7 @@ app.post('/exercises', (req, res) => {
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const result = calculateExercises(daily_exercises, Number(target));
+    const result = calculateExercises(daily_exercises as [], Number(target));
     res.json(result);
   } catch (error: unknown) {
     res.status(500).json({ error: 'something went wrong' });
