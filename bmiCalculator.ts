@@ -1,7 +1,7 @@
 interface BmiValues {
-    value1: number;
-    value2: number;
-  }
+  value1: number;
+  value2: number;
+}
   
 const parseArguments = (args: string[]): BmiValues => {
   if (args.length < 4) throw new Error('Not enough arguments');
@@ -28,9 +28,9 @@ const bmiCategory = (bmi: number): string => {
   return 'Obese (Class III)';
 };
 
-const calculateBmi = (height: number, weight: number) => {
-    const bmi = weight / (height/100 * height/100);
-    return bmiCategory(bmi);
+const calculateBmi = (height: number, weight: number): string => {
+  const bmi = weight / (height/100 * height/100);
+  return bmiCategory(bmi);
 }
 
 try {
