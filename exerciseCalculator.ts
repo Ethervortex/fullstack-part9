@@ -80,12 +80,10 @@ const calculateExercises = (dailyExerciseHours: number[], targetAmount: number):
 }
 
 try {
-  //Hard coded:
-  const dailyExerciseHours = [3, 0, 2, 4.5, 0, 3, 1];
-  const targetAmount = 2;
-  //const {dailyExerciseHours, targetAmount} = parseInput(process.argv);
-  console.log('Example call: [3, 0, 2, 4.5, 0, 3, 1], 2')
-  console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2))
+  // Hard coded:
+  // const dailyExerciseHours = [3, 0, 2, 4.5, 0, 3, 1];
+  // const targetAmount = 2;
+  const {dailyExerciseHours, targetAmount} = parseInput(process.argv);
   console.log(calculateExercises(dailyExerciseHours, targetAmount));
 } catch (error: unknown) {
   let errorMessage = 'Something went wrong.'
