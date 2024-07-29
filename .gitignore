@@ -1,3 +1,5 @@
 node_modules
 ./part9b/node_modules
 ./backend/node_modules
+./patientor/node_modules
+./patientor
