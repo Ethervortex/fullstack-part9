@@ -22,7 +22,6 @@ const parseDate = (date: unknown): string => {
   return date;
 };
 
-
 const isGender = (gender: unknown): gender is Gender => {
   return typeof gender === 'string' && Object.values(Gender).includes(gender as Gender);
 };
