@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Diary, NewDiary } from "./types";
 import { getAllDiaries, createDiary } from './diaryService';
 
@@ -24,7 +25,8 @@ const App = () => {
 
   const [diaries, setDiaries] = useState<Diary[]>([]);
   const [newDiary, setNewDiary] = useState<NewDiary>({ date: '', visibility: '', weather: '', comment: '' });
-  
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     getAllDiaries().then(data => {
       setDiaries(data)
@@ -36,27 +38,28 @@ const App = () => {
     setNewDiary({ ...newDiary, [name]: value });
   };
   
-  const diaryCreation = (event: React.SyntheticEvent) => {
+  const diaryCreation = async (event: React.SyntheticEvent) => {
     event.preventDefault();
-    createDiary(newDiary).then(data => {
+    try {
+      const data = await createDiary(newDiary);
       setDiaries(diaries.concat(data));
-    });
-
-    setNewDiary({ date: '', visibility: '', weather: '', comment: '' });
+      setNewDiary({ date: '', visibility: '', weather: '', comment: '' });
+      setError(null);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.log('Axios error:', error);
+        console.log('Response data:', error.response.data);
+        setError(error.response.data);
+      } else {
+        setError('An unexpected error occurred.');
+      }
+    }
   };
-  /*
-  const diaryCreation = (event: React.SyntheticEvent) => {
-    event.preventDefault()
-    createDiary({ content: newDiary }).then(data => {
-      setDiaries(diaries.concat(data))
-    })
-
-    setNewDiary('')
-  }; */
 
   return (
     <div>
       <Header name={newEntryHeader} />
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={diaryCreation}>
         <div>
           date: <input type="text" name="date" value={newDiary.date} onChange={handleChange} required />
