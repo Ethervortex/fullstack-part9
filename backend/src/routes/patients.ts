@@ -5,7 +5,6 @@ import toNewPatientEntry from '../utils';
 const patRouter = express.Router();
 
 patRouter.get('/', (_req, res) => {
-  // res.send('Fetching all patients');
   res.send(patientService.getNonSensitivePatients());
 });
   
@@ -22,5 +21,21 @@ patRouter.post('/', (req, res) => {
     res.status(400).send(errorMessage);
   }
 });
+
+patRouter.get('/:id', (req, res) => {
+  try {
+    const patient = patientService.getByID(req.params.id);
+    if (patient === undefined) { 
+      res.status(404);
+    }
+    res.json(patient);
+  } catch (error: unknown) {
+    let errorMessage = 'Something went wrong.';
+    if (error instanceof Error) {
+      errorMessage += ' Error: ' + error.message;
+    }
+    res.status(400).send(errorMessage);
+  }
+})
 
 export default patRouter;
