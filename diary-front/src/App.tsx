@@ -19,9 +19,11 @@ const Entries = ({ parts }: { parts: Diary[] }) => (
 );
 
 const App = () => {
-  const diaryHeader = "Diary entries"
+  const diaryHeader = "Diary entries";
+  const newEntryHeader = "Add new entry";
 
   const [diaries, setDiaries] = useState<Diary[]>([]);
+  const [newDiary, setNewDiary] = useState<NewDiary>({ date: '', visibility: '', weather: '', comment: '' });
   
   useEffect(() => {
     getAllDiaries().then(data => {
@@ -29,8 +31,47 @@ const App = () => {
     })
   }, [])
 
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setNewDiary({ ...newDiary, [name]: value });
+  };
+  
+  const diaryCreation = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    createDiary(newDiary).then(data => {
+      setDiaries(diaries.concat(data));
+    });
+
+    setNewDiary({ date: '', visibility: '', weather: '', comment: '' });
+  };
+  /*
+  const diaryCreation = (event: React.SyntheticEvent) => {
+    event.preventDefault()
+    createDiary({ content: newDiary }).then(data => {
+      setDiaries(diaries.concat(data))
+    })
+
+    setNewDiary('')
+  }; */
+
   return (
     <div>
+      <Header name={newEntryHeader} />
+      <form onSubmit={diaryCreation}>
+        <div>
+          date: <input type="text" name="date" value={newDiary.date} onChange={handleChange} required />
+        </div>
+        <div>
+          visibility: <input type="text" name="visibility" value={newDiary.visibility} onChange={handleChange} required />
+        </div>
+        <div>
+          weather: <input type="text" name="weather" value={newDiary.weather} onChange={handleChange} required />
+        </div>
+        <div>
+          comment: <input type="text" name="comment" value={newDiary.comment} onChange={handleChange} />
+        </div>
+        <button type="submit">add</button>
+      </form>
       <Header name={diaryHeader} />
       <Entries parts={diaries} />
     </div>
