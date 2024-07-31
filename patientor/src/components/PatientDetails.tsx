@@ -18,20 +18,20 @@ const assertNever = (value: never): never => {
   );
 };
 
-const EntryDetails: React.FC<{ entry: Entry, renderCodeName: (code: string) => string }> = ({ entry, renderCodeName }) => {
+const EntryDetails: React.FC<{ entry: Entry }> = ({ entry }) => {
   switch (entry.type) {
     case "HealthCheck":
-      return <HealthCheckEntry entry={entry} renderCodeName={renderCodeName} />;
+      return <HealthCheckEntry entry={entry} />;
     case "Hospital":
-      return <HospitalEntry entry={entry} renderCodeName={renderCodeName}/>;
+      return <HospitalEntry entry={entry} />;
     case "OccupationalHealthcare":
-      return <OccupationalHealthcareEntry entry={entry} renderCodeName={renderCodeName}/>;
+      return <OccupationalHealthcareEntry entry={entry} />;
     default:
       return assertNever(entry);
   }
 }
 
-const HealthCheckEntry: React.FC<{ entry: Entry, renderCodeName: (code: string) => string }> = ({ entry, renderCodeName }) => {
+const HealthCheckEntry: React.FC<{ entry: Entry }> = ({ entry }) => {
   if (entry.type !== "HealthCheck") return null;
   
   const getHeart = (rating: HealthCheckRating) => {
@@ -67,7 +67,7 @@ const HealthCheckEntry: React.FC<{ entry: Entry, renderCodeName: (code: string) 
   );
 };
 
-const HospitalEntry: React.FC<{ entry: Entry, renderCodeName: (code: string) => string }> = ({ entry, renderCodeName }) => {
+const HospitalEntry: React.FC<{ entry: Entry }> = ({ entry }) => {
   if (entry.type !== "Hospital") return null;
 
   return (
@@ -82,7 +82,7 @@ const HospitalEntry: React.FC<{ entry: Entry, renderCodeName: (code: string) => 
   );
 };
 
-const OccupationalHealthcareEntry: React.FC<{ entry: Entry, renderCodeName: (code: string) => string }> = ({ entry, renderCodeName }) => {
+const OccupationalHealthcareEntry: React.FC<{ entry: Entry }> = ({ entry }) => {
   if (entry.type !== "OccupationalHealthcare") return null;
 
   return (
@@ -159,7 +159,7 @@ const PatientDetails = () => {
       <Typography variant="h5" style={{ marginTop: "15px", marginBottom: "10px" }}>entries</Typography>
       {patient.entries.map((entry) => (
         <Box key={entry.id} style={{ marginBottom: "10px", border: "1px solid #000", padding: "10px", borderRadius: "5px"}}>
-          <EntryDetails entry={entry} renderCodeName={renderCodeName} />
+          <EntryDetails entry={entry} />
           <Typography variant="body1">diagnosed by {entry.specialist}</Typography>
           {entry.diagnosisCodes && (
             <ul>
