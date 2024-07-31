@@ -1,4 +1,4 @@
-import { NewPatientEntry, Gender } from './types';
+import { NewPatientEntry, Gender, NewEntry, HealthCheckRating, Diagnosis } from './types';
 
 const isString = (text: unknown): text is string => {
   return typeof text === 'string' || text instanceof String;
@@ -26,14 +26,14 @@ const isGender = (gender: unknown): gender is Gender => {
   return typeof gender === 'string' && Object.values(Gender).includes(gender as Gender);
 };
 
-const parseGender = (gender: unknown): string => {
+const parseGender = (gender: unknown): Gender => {
   if (!gender || !isGender(gender)) {
     throw new Error('Incorrect or missing gender: ' + gender);
   }
-  return gender;
+  return gender as Gender;
 };
 
-const toNewPatientEntry = (object: unknown): NewPatientEntry => {
+export const toNewPatientEntry = (object: unknown): NewPatientEntry => {
   if ( !object || typeof object !== 'object' ) {
     throw new Error('Incorrect or missing data');
   }
@@ -50,4 +50,76 @@ const toNewPatientEntry = (object: unknown): NewPatientEntry => {
   throw new Error('Incorrect data: some fields are missing');
 };
 
-export default toNewPatientEntry;
+const isRating = (param: any): param is HealthCheckRating => {
+  return Object.values(HealthCheckRating).includes(param);
+};
+
+const parseRating = (rating: unknown): HealthCheckRating => {
+  if (rating === undefined || !isRating(rating)) {
+    throw new Error('Incorrect or missing health check rating: ' + rating);
+  }
+  return rating;
+};
+
+/*
+const parseDiagnosisCodes = (object: unknown): Array<Diagnosis['code']> =>  {
+  if (!object || typeof object !== 'object' || !('diagnosisCodes' in object)) {
+    return [] as Array<Diagnosis['code']>;
+  }
+  return object.diagnosisCodes as Array<Diagnosis['code']>;
+};
+*/
+const isDiagnosisCodeArray = (array: unknown): array is Array<Diagnosis['code']> => {
+  return Array.isArray(array) && array.every(code => isString(code));
+};
+
+const parseDiagnosisCodes = (codes: unknown): Array<Diagnosis['code']> => {
+  if (!codes || !isDiagnosisCodeArray(codes)) {
+    throw new Error('Incorrect or missing diagnosis codes: ' + codes);
+  }
+  return codes;
+};
+
+export const toNewEntry = (object: any): NewEntry => {
+  if ( !object || typeof object !== 'object' ) {
+    throw new Error('Incorrect or missing data');
+  }
+  //if ('description' in object && 'date' in object && 'specialist' in object && 'diagnosisCodes' in object && 'type' in object) {
+  const base = {
+    description: parseString(object.description),
+    date: parseDate(object.date),
+    specialist: parseString(object.specialist),
+    diagnosisCodes: parseDiagnosisCodes(object.diagnosisCodes)
+  };
+
+  switch (object.type) {
+    case "HealthCheck":
+      return {
+        ...base,
+        type: "HealthCheck",
+        healthCheckRating: parseRating(object.healthCheckRating)
+      };
+    case "Hospital":
+      return {
+        ...base,
+        type: "Hospital",
+        discharge: {
+          date: parseDate(object.discharge.date),
+          criteria: parseString(object.discharge.criteria)
+        }
+      };
+    case "OccupationalHealthcare":
+      return {
+        ...base,
+        type: "OccupationalHealthcare",
+        employerName: parseString(object.employerName),
+        sickLeave: object.sickLeave ? {
+          startDate: parseDate(object.sickLeave.startDate),
+          endDate: parseDate(object.sickLeave.endDate)
+        } : undefined
+      };
+    default:
+      throw new Error('Incorrect or missing entry type');
+  }
+//  }
+};
