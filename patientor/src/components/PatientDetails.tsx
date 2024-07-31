@@ -51,6 +51,22 @@ const PatientDetails = () => {
       <Typography variant="body1">Gender: {patient.gender}</Typography>
       <Typography variant="body1">Date of Birth: {patient.dateOfBirth}</Typography>
       <Typography variant="body1">Occupation: {patient.occupation}</Typography>
+      <Typography variant="h5" style={{ marginTop: "15px", marginBottom: "10px" }}>entries</Typography>
+      {patient.entries.map((entry) => (
+        <Box key={entry.id} style={{ marginBottom: "10px" }}>
+          <Box display="flex" alignItems="center">
+            <Typography variant="body1" style={{ marginRight: "10px" }}>{entry.date}</Typography>
+            <Typography variant="body1" style={{ fontStyle: "italic" }}>{entry.description}</Typography>
+          </Box>
+          {entry.diagnosisCodes && (
+            <ul>
+              {entry.diagnosisCodes.map((code) => (
+                <li key={code}>{code}</li>
+              ))}
+            </ul>
+          )}
+        </Box>
+      ))}
     </Container>
   );
 };
