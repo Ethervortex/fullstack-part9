@@ -3,22 +3,100 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Typography, Box, Container } from '@mui/material';
 import { apiBaseUrl } from "../constants";
-import { Patient, Diagnosis } from "../types";
+import { Patient, Diagnosis, Entry, HealthCheckRating } from "../types";
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import TransgenderIcon from '@mui/icons-material/Transgender';
+import { Favorite } from '@mui/icons-material';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import WorkIcon from '@mui/icons-material/Work';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 
-/*
-const EntryDetails: React.FC<{ entry: <Entry> }> = ({ entry }) => {
+const assertNever = (value: never): never => {
+  throw new Error(
+    `Unhandled discriminated union member: ${JSON.stringify(value)}`
+  );
+};
+
+const EntryDetails: React.FC<{ entry: Entry, renderCodeName: (code: string) => string }> = ({ entry, renderCodeName }) => {
   switch (entry.type) {
+    case "HealthCheck":
+      return <HealthCheckEntry entry={entry} renderCodeName={renderCodeName} />;
     case "Hospital":
-      return <HospitalEntry />;
+      return <HospitalEntry entry={entry} renderCodeName={renderCodeName}/>;
     case "OccupationalHealthcare":
-      return <OccupationalHealthcare />;
+      return <OccupationalHealthcareEntry entry={entry} renderCodeName={renderCodeName}/>;
     default:
       return assertNever(entry);
   }
-} */
+}
+
+const HealthCheckEntry: React.FC<{ entry: Entry, renderCodeName: (code: string) => string }> = ({ entry, renderCodeName }) => {
+  if (entry.type !== "HealthCheck") return null;
+  
+  const getHeart = (rating: HealthCheckRating) => {
+    switch (rating) {
+      case HealthCheckRating.Healthy:
+        return "green";
+      case HealthCheckRating.LowRisk:
+        return "yellow";
+      case HealthCheckRating.HighRisk:
+        return "orange";
+      case HealthCheckRating.CriticalRisk:
+        return "red";
+      default:
+        return "grey";
+    }
+  };
+
+  return (
+    <>
+      <Box display="flex" alignItems="center">
+        <Typography variant="body1" style={{ marginRight: "10px" }}>{entry.date}</Typography>
+        <MedicalServicesIcon />
+      </Box>
+      <Typography variant="body1" style={{ fontStyle: "italic" }}>{entry.description}</Typography>
+      
+      <Box display="flex" alignItems="center">
+        <Typography variant="body1" style={{ marginRight: "10px" }}>
+          Health Check Rating:
+        </Typography>
+        <Favorite style={{ color: getHeart(entry.healthCheckRating) }} />
+      </Box>
+    </>
+  );
+};
+
+const HospitalEntry: React.FC<{ entry: Entry, renderCodeName: (code: string) => string }> = ({ entry, renderCodeName }) => {
+  if (entry.type !== "Hospital") return null;
+
+  return (
+    <>
+      <Box display="flex" alignItems="center">
+        <Typography variant="body1" style={{ marginRight: "10px" }}>{entry.date}</Typography>
+        <LocalHospitalIcon />
+      </Box>
+      <Typography variant="body1" style={{ fontStyle: "italic" }}>{entry.description}</Typography>
+      
+    </>
+  );
+};
+
+const OccupationalHealthcareEntry: React.FC<{ entry: Entry, renderCodeName: (code: string) => string }> = ({ entry, renderCodeName }) => {
+  if (entry.type !== "OccupationalHealthcare") return null;
+
+  return (
+    <>
+      <Box display="flex" alignItems="center">
+        <Typography variant="body1" style={{ marginRight: "10px" }}>{entry.date}</Typography>
+        <WorkIcon />
+        <Typography variant="body1" style={{ marginLeft: "10px" }}>{entry.employerName}</Typography>
+      </Box>
+      <Typography variant="body1" style={{ fontStyle: "italic" }}>{entry.description}</Typography>
+      
+    </>
+  );
+};
 
 const PatientDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -80,11 +158,9 @@ const PatientDetails = () => {
       <Typography variant="body1">Occupation: {patient.occupation}</Typography>
       <Typography variant="h5" style={{ marginTop: "15px", marginBottom: "10px" }}>entries</Typography>
       {patient.entries.map((entry) => (
-        <Box key={entry.id} style={{ marginBottom: "10px" }}>
-          <Box display="flex" alignItems="center">
-            <Typography variant="body1" style={{ marginRight: "10px" }}>{entry.date}</Typography>
-            <Typography variant="body1" style={{ fontStyle: "italic" }}>{entry.description}</Typography>
-          </Box>
+        <Box key={entry.id} style={{ marginBottom: "10px", border: "1px solid #000", padding: "10px", borderRadius: "5px"}}>
+          <EntryDetails entry={entry} renderCodeName={renderCodeName} />
+          <Typography variant="body1">diagnosed by {entry.specialist}</Typography>
           {entry.diagnosisCodes && (
             <ul>
               {entry.diagnosisCodes.map((code) => (
