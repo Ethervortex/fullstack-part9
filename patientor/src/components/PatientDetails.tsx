@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Typography, Box, Container } from '@mui/material';
+import { Typography, Box, Container, Button } from '@mui/material';
 import { apiBaseUrl } from "../constants";
 import { Patient, Diagnosis, Entry, HealthCheckRating } from "../types";
 import MaleIcon from '@mui/icons-material/Male';
@@ -11,6 +11,7 @@ import { Favorite } from '@mui/icons-material';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import WorkIcon from '@mui/icons-material/Work';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import HealthCheckEntryForm, { HealthCheckEntryFormValues } from './HealthcheckEntryForm';
 
 const assertNever = (value: never): never => {
   throw new Error(
@@ -102,7 +103,10 @@ const PatientDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
+  /*
   useEffect(() => {
     if (id) {
       const getPatient = async () => {
@@ -125,6 +129,32 @@ const PatientDetails = () => {
       getDiagnoses();
     }
   }, [id]);
+  */
+
+  const getPatientData = async () => {
+    if (id) {
+      try {
+        const res = await axios.get<Patient>(`${apiBaseUrl}/patients/${id}`);
+        setPatient(res.data);
+      } catch (error: unknown) {
+        console.error("Error getting patient details:", error);
+      }
+    }
+  };
+
+  const getDiagnoses = async () => {
+    try {
+      const res = await axios.get<Diagnosis[]>(`${apiBaseUrl}/diagnoses`);
+      setDiagnoses(res.data);
+    } catch (error: unknown) {
+      console.error("Error getting diagnoses:", error);
+    }
+  };
+
+  useEffect(() => {
+    getPatientData();
+    getDiagnoses();
+  }, [id]);
 
   if (!patient) return <div>Loading patient data...</div>;
 
@@ -146,6 +176,30 @@ const PatientDetails = () => {
     }
   };
 
+  const handleFormSubmit = async (values: HealthCheckEntryFormValues) => {
+    try {
+      const response = await axios.post(`${apiBaseUrl}/patients/${id}/entries`, values);
+      console.log('New health check entry:', response.data);
+      await getPatientData();
+      setShowForm(false);
+      setFormError(null);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.log(error.response)
+        setFormError(error.response.data || 'Unknown error');
+      } else {
+        setFormError('Unexpected error occurred');
+      }
+      console.error('Error submitting health check entry:', error);
+    }
+    
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setFormError(null);
+  };
+
   return (
     <Container>
       <Box display="flex" style={{ marginTop: "20px" }}>
@@ -156,6 +210,27 @@ const PatientDetails = () => {
       <Typography variant="body1">Gender: {patient.gender}</Typography>
       <Typography variant="body1">Date of Birth: {patient.dateOfBirth}</Typography>
       <Typography variant="body1">Occupation: {patient.occupation}</Typography>
+      {formError && (
+        <Typography color="error" variant="body2" style={{ marginTop: "10px", marginBottom: "10px" }}>
+          {formError}
+        </Typography>
+      )}
+
+      <Button 
+        variant="contained" 
+        color="primary" 
+        onClick={() => setShowForm(true)}
+      >
+        Add Health Check entry
+      </Button>
+
+      {showForm && (
+        <HealthCheckEntryForm 
+          onSubmit={handleFormSubmit} 
+          onCancel={handleCancel} 
+        />
+      )}
+
       <Typography variant="h5" style={{ marginTop: "15px", marginBottom: "10px" }}>entries</Typography>
       {patient.entries.map((entry) => (
         <Box key={entry.id} style={{ marginBottom: "10px", border: "1px solid #000", padding: "10px", borderRadius: "5px"}}>
