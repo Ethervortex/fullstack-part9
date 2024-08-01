@@ -1,18 +1,17 @@
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Typography, Box, Container, Button } from '@mui/material';
 import { apiBaseUrl } from "../constants";
-import { Patient, Diagnosis, Entry, HealthCheckRating } from "../types";
+import { Patient, Diagnosis, Entry } from "../types";
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import TransgenderIcon from '@mui/icons-material/Transgender';
-import { Favorite } from '@mui/icons-material';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import WorkIcon from '@mui/icons-material/Work';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import HealthCheckEntry from './HealthCheckEntry';
 import HealthCheckEntryForm, { HealthCheckEntryFormValues } from './HealthcheckEntryForm';
+import HospitalEntry from './HospitalEntry';
 import HospitalEntryForm, { HospitalEntryFormValues } from './HospitalEntryForm';
+import OccupationalHealthcareEntry from './OccupationalHealthcareEntry';
 import OccupationalEntryForm, { OccupationalEntryFormValues } from './OccupationalEntryForm';
 
 const assertNever = (value: never): never => {
@@ -32,73 +31,6 @@ const EntryDetails: React.FC<{ entry: Entry }> = ({ entry }) => {
     default:
       return assertNever(entry);
   }
-}
-
-const HealthCheckEntry: React.FC<{ entry: Entry }> = ({ entry }) => {
-  if (entry.type !== "HealthCheck") return null;
-  
-  const getHeart = (rating: HealthCheckRating) => {
-    switch (rating) {
-      case HealthCheckRating.Healthy:
-        return "green";
-      case HealthCheckRating.LowRisk:
-        return "yellow";
-      case HealthCheckRating.HighRisk:
-        return "orange";
-      case HealthCheckRating.CriticalRisk:
-        return "red";
-      default:
-        return "grey";
-    }
-  };
-
-  return (
-    <>
-      <Box display="flex" alignItems="center">
-        <Typography variant="body1" style={{ marginRight: "10px" }}>{entry.date}</Typography>
-        <MedicalServicesIcon />
-      </Box>
-      <Typography variant="body1" style={{ fontStyle: "italic" }}>{entry.description}</Typography>
-      
-      <Box display="flex" alignItems="center">
-        <Typography variant="body1" style={{ marginRight: "10px" }}>
-          Health Check Rating:
-        </Typography>
-        <Favorite style={{ color: getHeart(entry.healthCheckRating) }} />
-      </Box>
-    </>
-  );
-};
-
-const HospitalEntry: React.FC<{ entry: Entry }> = ({ entry }) => {
-  if (entry.type !== "Hospital") return null;
-
-  return (
-    <>
-      <Box display="flex" alignItems="center">
-        <Typography variant="body1" style={{ marginRight: "10px" }}>{entry.date}</Typography>
-        <LocalHospitalIcon />
-      </Box>
-      <Typography variant="body1" style={{ fontStyle: "italic" }}>{entry.description}</Typography>
-      
-    </>
-  );
-};
-
-const OccupationalHealthcareEntry: React.FC<{ entry: Entry }> = ({ entry }) => {
-  if (entry.type !== "OccupationalHealthcare") return null;
-
-  return (
-    <>
-      <Box display="flex" alignItems="center">
-        <Typography variant="body1" style={{ marginRight: "10px" }}>{entry.date}</Typography>
-        <WorkIcon />
-        <Typography variant="body1" style={{ marginLeft: "10px" }}>{entry.employerName}</Typography>
-      </Box>
-      <Typography variant="body1" style={{ fontStyle: "italic" }}>{entry.description}</Typography>
-      
-    </>
-  );
 };
 
 const PatientDetails = () => {
@@ -110,7 +42,7 @@ const PatientDetails = () => {
   const [showOccupationalForm, setShowOccupationalForm] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const getPatientData = async () => {
+  const getPatientData = useCallback(async () => {
     if (id) {
       try {
         const res = await axios.get<Patient>(`${apiBaseUrl}/patients/${id}`);
@@ -119,21 +51,21 @@ const PatientDetails = () => {
         console.error("Error getting patient details:", error);
       }
     }
-  };
-
-  const getDiagnoses = async () => {
+  }, [id]);
+  
+  const getDiagnoses = useCallback(async () => {
     try {
       const res = await axios.get<Diagnosis[]>(`${apiBaseUrl}/diagnoses`);
       setDiagnoses(res.data);
     } catch (error: unknown) {
       console.error("Error getting diagnoses:", error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     getPatientData();
     getDiagnoses();
-  }, [id]);
+  }, [id, getPatientData, getDiagnoses]);
 
   if (!patient) return <div>Loading patient data...</div>;
 

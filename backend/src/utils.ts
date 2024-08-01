@@ -30,7 +30,7 @@ const parseGender = (gender: unknown): Gender => {
   if (!gender || !isGender(gender)) {
     throw new Error('Incorrect or missing gender: ' + gender);
   }
-  return gender as Gender;
+  return gender;
 };
 
 export const toNewPatientEntry = (object: unknown): NewPatientEntry => {
@@ -50,8 +50,8 @@ export const toNewPatientEntry = (object: unknown): NewPatientEntry => {
   throw new Error('Incorrect data: some fields are missing');
 };
 
-const isRating = (param: any): param is HealthCheckRating => {
-  return Object.values(HealthCheckRating).includes(param);
+const isRating = (param: unknown): param is HealthCheckRating => {
+  return Object.values(HealthCheckRating).includes(param  as HealthCheckRating);
 };
 
 const parseRating = (rating: unknown): HealthCheckRating => {
@@ -61,14 +61,6 @@ const parseRating = (rating: unknown): HealthCheckRating => {
   return rating;
 };
 
-/*
-const parseDiagnosisCodes = (object: unknown): Array<Diagnosis['code']> =>  {
-  if (!object || typeof object !== 'object' || !('diagnosisCodes' in object)) {
-    return [] as Array<Diagnosis['code']>;
-  }
-  return object.diagnosisCodes as Array<Diagnosis['code']>;
-};
-*/
 const isDiagnosisCodeArray = (array: unknown): array is Array<Diagnosis['code']> => {
   return Array.isArray(array) && array.every(code => isString(code));
 };
@@ -80,6 +72,7 @@ const parseDiagnosisCodes = (codes: unknown): Array<Diagnosis['code']> => {
   return codes;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const toNewEntry = (object: any): NewEntry => {
   if ( !object || typeof object !== 'object' ) {
     throw new Error('Incorrect or missing data');

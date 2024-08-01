@@ -54,6 +54,6 @@ patRouter.post('/:id/entries', (req, res) => {
     }
     res.status(400).send(errorMessage);
   }
-})
+});
 
 export default patRouter;
