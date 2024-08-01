@@ -12,6 +12,8 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import WorkIcon from '@mui/icons-material/Work';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import HealthCheckEntryForm, { HealthCheckEntryFormValues } from './HealthcheckEntryForm';
+import HospitalEntryForm, { HospitalEntryFormValues } from './HospitalEntryForm';
+import OccupationalEntryForm, { OccupationalEntryFormValues } from './OccupationalEntryForm';
 
 const assertNever = (value: never): never => {
   throw new Error(
@@ -104,32 +106,9 @@ const PatientDetails = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [showHospitalForm, setShowHospitalForm] = useState(false);
+  const [showOccupationalForm, setShowOccupationalForm] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-
-  /*
-  useEffect(() => {
-    if (id) {
-      const getPatient = async () => {
-        try {
-          const res = await axios.get<Patient>(`${apiBaseUrl}/patients/${id}`);
-          setPatient(res.data);
-        } catch (error: unknown) {
-          console.error("Error getting patient details:", error);
-        }
-      };
-      getPatient();
-      const getDiagnoses = async () => {
-        try {
-          const res = await axios.get<Diagnosis[]>(`${apiBaseUrl}/diagnoses`);
-          setDiagnoses(res.data);
-        } catch (error: unknown) {
-          console.error("Error getting diagnoses:", error);
-        }
-      };
-      getDiagnoses();
-    }
-  }, [id]);
-  */
 
   const getPatientData = async () => {
     if (id) {
@@ -185,18 +164,53 @@ const PatientDetails = () => {
       setFormError(null);
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log(error.response)
+        //console.log(error.response)
         setFormError(error.response.data || 'Unknown error');
       } else {
         setFormError('Unexpected error occurred');
       }
       console.error('Error submitting health check entry:', error);
+    } 
+  };
+
+  const handleHospitalSubmit = async (values: HospitalEntryFormValues) => {
+    try {
+      const response = await axios.post(`${apiBaseUrl}/patients/${id}/entries`, values);
+      console.log('New hospital entry:', response.data);
+      await getPatientData();
+      setShowHospitalForm(false);
+      setFormError(null);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        setFormError(error.response.data || 'Unknown error');
+      } else {
+        setFormError('Unexpected error occurred');
+      }
+      console.error('Error submitting hospital entry:', error);
     }
-    
+  };
+
+  const handleOccupationalSubmit = async (values: OccupationalEntryFormValues) => {
+    try {
+      const response = await axios.post(`${apiBaseUrl}/patients/${id}/entries`, values);
+      console.log('New occupational healthcare entry:', response.data);
+      await getPatientData();
+      setShowOccupationalForm(false);
+      setFormError(null);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        setFormError(error.response.data || 'Unknown error');
+      } else {
+        setFormError('Unexpected error occurred');
+      }
+      console.error('Error submitting occupational healthcare entry:', error);
+    }
   };
 
   const handleCancel = () => {
     setShowForm(false);
+    setShowHospitalForm(false);
+    setShowOccupationalForm(false);
     setFormError(null);
   };
 
@@ -216,17 +230,61 @@ const PatientDetails = () => {
         </Typography>
       )}
 
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={() => setShowForm(true)}
-      >
-        Add Health Check entry
-      </Button>
+      <Box display="flex" style={{ marginTop: "20px" }}>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={() => {
+            setShowForm(true);
+            setShowHospitalForm(false);
+            setShowOccupationalForm(false);
+          }}
+          style={{ marginRight: "10px" }}
+        >
+          Add Health Check entry
+        </Button>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={() => {
+            setShowHospitalForm(true);
+            setShowForm(false);
+            setShowOccupationalForm(false);
+          }}
+          style={{ marginRight: "10px" }}
+        >
+          Add Hospital entry
+        </Button>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={() => {
+            setShowOccupationalForm(true);
+            setShowHospitalForm(false);
+            setShowForm(false);
+          }}
+        >
+          Add Occupational Healthcare entry
+        </Button>
+      </Box>
 
       {showForm && (
         <HealthCheckEntryForm 
           onSubmit={handleFormSubmit} 
+          onCancel={handleCancel} 
+        />
+      )}
+
+      {showHospitalForm && (
+        <HospitalEntryForm 
+          onSubmit={handleHospitalSubmit} 
+          onCancel={handleCancel} 
+        />
+      )}
+
+      {showOccupationalForm && (
+        <OccupationalEntryForm 
+          onSubmit={handleOccupationalSubmit} 
           onCancel={handleCancel} 
         />
       )}
